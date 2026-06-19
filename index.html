@@ -6,16 +6,19 @@
     <title>Brian's Graduation Check-In</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #0a0a0a;
-            --card-bg: #121212;
-            --border-color: #262626;
+            --bg-color: #050505;
+            --card-bg: #0f0f0f;
+            --card-hover: #161616;
+            --border-color: #1f1f1f;
+            --border-hover: #333333;
             --text-main: #ffffff;
-            --text-muted: #a3a3a3;
+            --text-muted: #888888;
             --accent: #ffffff;
+            --ease-custom: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -31,39 +34,48 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* View Toggler & Admin Access Layout */
         #control-bar {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 24px;
+            right: 24px;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 10px;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px;
             border: 1px solid var(--border-color);
             border-radius: 0px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
+            animation: barFadeIn 0.8s var(--ease-custom) both;
         }
 
         button.nav-btn {
             background: #ffffff;
             color: #000000;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 18px;
             font-weight: 600;
             cursor: pointer;
             border-radius: 0px;
             text-transform: uppercase;
             font-size: 11px;
             letter-spacing: 1px;
-            transition: opacity 0.2s;
+            transition: all 0.2s var(--ease-custom);
         }
 
         button.nav-btn:hover {
-            opacity: 0.9;
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        button.nav-btn:active {
+            transform: translateY(0);
         }
 
         button.nav-btn.secondary {
@@ -75,6 +87,7 @@
         button.nav-btn.secondary:hover {
             background: #ffffff;
             color: #000000;
+            border-color: #ffffff;
         }
 
         /* Views Layout */
@@ -82,10 +95,13 @@
             display: none;
             height: 100vh;
             width: 100vw;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
         }
 
         .view.active {
             display: flex;
+            opacity: 1;
         }
 
         /* ==================== TV VIEW STYLE ==================== */
@@ -94,50 +110,53 @@
         }
 
         #tv-left {
-            width: 70%;
+            width: 65%;
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
+            padding: 60px;
             text-align: center;
             position: relative;
         }
 
         #tv-left h1 {
-            font-size: 5rem;
+            font-size: 5.5rem;
             font-weight: 800;
-            letter-spacing: -2px;
+            letter-spacing: -3px;
             text-transform: uppercase;
-            line-height: 1;
-            margin-bottom: 20px;
+            line-height: 0.95;
+            margin-bottom: 24px;
+            animation: textReveal 1s var(--ease-custom) both;
         }
 
         #tv-left p.sub {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             color: var(--text-muted);
             font-weight: 300;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
             text-transform: uppercase;
+            animation: textReveal 1.2s var(--ease-custom) both;
         }
 
         #tv-right {
-            width: 30%;
-            background-color: #050505;
+            width: 35%;
+            background-color: #020202;
             display: flex;
             flex-direction: column;
-            padding: 40px;
+            padding: 50px 40px;
         }
 
         #tv-right h2 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
+            letter-spacing: 3px;
+            margin-bottom: 24px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
+            padding-bottom: 16px;
+            color: var(--text-muted);
         }
 
         .roster-list {
@@ -148,29 +167,31 @@
 
         .roster-item {
             font-size: 1.25rem;
-            padding: 12px 0;
-            border-bottom: 1px solid #1a1a1a;
+            padding: 16px 0;
+            border-bottom: 1px solid #121212;
             color: var(--text-muted);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            animation: rowEntrance 0.5s var(--ease-custom) both;
         }
 
         .roster-item.checked-in {
             color: var(--text-main);
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .roster-item .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background-color: #222;
+            background-color: #1a1a1a;
+            transition: all 0.4s var(--ease-custom);
         }
 
         .roster-item.checked-in .status-dot {
             background-color: #fff;
-            box-shadow: 0 0 10px #fff;
+            box-shadow: 0 0 12px 2px #fff;
         }
 
         /* Overlay Alert on TV */
@@ -187,7 +208,7 @@
             align-items: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 10;
         }
 
@@ -196,67 +217,86 @@
         }
 
         .checkmark-icon {
-            font-size: 7rem;
-            margin-bottom: 20px;
-            animation: scaleUp 0.4s ease;
+            font-size: 8rem;
+            margin-bottom: 16px;
+            transform: scale(0.6);
+            opacity: 0;
+            transition: all 0.5s var(--ease-custom);
+        }
+
+        #tv-alert-overlay.show .checkmark-icon {
+            transform: scale(1);
+            opacity: 1;
+            transition-delay: 0.1s;
         }
 
         #tv-alert-message {
             font-size: 3rem;
-            font-weight: 600;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: -0.5px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s var(--ease-custom);
+        }
+
+        #tv-alert-overlay.show #tv-alert-message {
+            transform: translateY(0);
+            opacity: 1;
+            transition-delay: 0.2s;
         }
 
         /* ==================== TABLET VIEW STYLE (LIST VIEW) ==================== */
         #tablet-view {
             flex-direction: column;
-            padding: 40px;
-            max-width: 700px;
+            padding: 60px 40px;
+            max-width: 680px;
             margin: 0 auto;
         }
 
         #tablet-view h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: -1px;
-            margin-bottom: 10px;
+            letter-spacing: -1.5px;
+            margin-bottom: 8px;
             text-align: center;
         }
 
         #tablet-view p.instruction {
             color: var(--text-muted);
             text-align: center;
-            margin-bottom: 35px;
-            font-size: 1.1rem;
+            margin-bottom: 40px;
+            font-size: 1.05rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         .tablet-list-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             overflow-y: auto;
-            padding-bottom: 60px;
-            height: calc(100vh - 200px);
+            padding-bottom: 80px;
+            height: calc(100vh - 220px);
         }
 
         .guest-row {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 20px 25px;
+            padding: 22px 28px;
             cursor: pointer;
-            transition: all 0.2s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.25s var(--ease-custom);
+            animation: rowEntrance 0.6s var(--ease-custom) both;
         }
 
         .guest-row:hover {
-            border-color: #555;
-            background: #161616;
+            border-color: var(--border-hover);
+            background: var(--card-hover);
+            transform: translateX(4px);
         }
 
         .guest-row.here {
@@ -264,20 +304,26 @@
             color: #000000;
             border-color: #ffffff;
             pointer-events: none;
+            transform: none;
         }
 
         .guest-name {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.3px;
         }
 
         .guest-status {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             font-weight: 600;
-            opacity: 0.6;
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+
+        .guest-row:hover .guest-status {
+            opacity: 1;
         }
 
         .guest-row.here .guest-status {
@@ -287,8 +333,8 @@
         /* ==================== ADMIN VIEW STYLE ==================== */
         #admin-view {
             flex-direction: column;
-            padding: 40px;
-            max-width: 700px;
+            padding: 60px 40px;
+            max-width: 680px;
             margin: 0 auto;
         }
 
@@ -296,64 +342,72 @@
             font-size: 2.5rem;
             font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: -1px;
             margin-bottom: 30px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            padding-bottom: 16px;
         }
 
         .admin-actions {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 30px;
         }
 
         .admin-input {
             flex-grow: 1;
-            background: #121212;
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: #fff;
-            padding: 12px 20px;
+            padding: 14px 20px;
             font-size: 1rem;
             border-radius: 0px;
+            transition: all 0.2s var(--ease-custom);
         }
 
         .admin-input:focus {
             outline: none;
-            border-color: #fff;
+            border-color: #666;
+            background: var(--card-hover);
         }
 
         .admin-list {
             list-style: none;
             overflow-y: auto;
-            height: calc(100vh - 300px);
+            height: calc(100vh - 320px);
         }
 
         .admin-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 0;
+            padding: 16px 0;
             border-bottom: 1px solid var(--border-color);
+            animation: rowEntrance 0.4s var(--ease-custom) both;
         }
 
         .admin-item span {
             font-size: 1.1rem;
+            font-weight: 500;
         }
 
         .delete-btn {
             background: transparent;
             color: #ff4444;
-            border: 1px solid #ff4444;
-            padding: 6px 12px;
+            border: 1px solid rgba(255, 68, 68, 0.2);
+            padding: 8px 14px;
             cursor: pointer;
             text-transform: uppercase;
             font-size: 11px;
             font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s var(--ease-custom);
         }
 
         .delete-btn:hover {
             background: #ff4444;
             color: #fff;
+            border-color: #ff4444;
         }
 
         /* ==================== APPS DIALOG MODALS ==================== */
@@ -363,52 +417,93 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s var(--ease-custom);
         }
 
         .app-modal.active {
             display: flex;
+            opacity: 1;
         }
 
         .modal-box {
-            background: #0d0d0d;
+            background: #0a0a0a;
             border: 1px solid var(--border-color);
-            padding: 30px;
+            padding: 40px 30px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s var(--ease-custom);
+        }
+
+        .app-modal.active .modal-box {
+            transform: scale(1);
+            opacity: 1;
         }
 
         .modal-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
+            letter-spacing: 1.5px;
+            margin-bottom: 24px;
         }
 
         .modal-error {
             color: #ff4444;
             font-size: 0.9rem;
-            margin-top: 10px;
+            margin-top: 12px;
             display: none;
+            animation: shake 0.4s var(--ease-custom) both;
         }
 
         .modal-buttons {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 28px;
         }
 
-        @keyframes scaleUp {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        /* ==================== HARDWARE CORE ANIMATIONS ==================== */
+        @keyframes rowEntrance {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
+
+        @keyframes textReveal {
+            from { transform: translateY(24px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes barFadeIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Stagger Layout Calculations */
+        .tablet-list-container > :nth-child(1)  { animation-delay: 0.04s; }
+        .tablet-list-container > :nth-child(2)  { animation-delay: 0.08s; }
+        .tablet-list-container > :nth-child(3)  { animation-delay: 0.12s; }
+        .tablet-list-container > :nth-child(4)  { animation-delay: 0.16s; }
+        .tablet-list-container > :nth-child(5)  { animation-delay: 0.20s; }
+        .tablet-list-container > :nth-child(6)  { animation-delay: 0.24s; }
+        .tablet-list-container > :nth-child(7)  { animation-delay: 0.28s; }
+        .tablet-list-container > :nth-child(8)  { animation-delay: 0.32s; }
 
         ::-webkit-scrollbar {
             width: 4px;
@@ -417,6 +512,9 @@
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
+            background: #222;
+        }
+        ::-webkit-scrollbar-thumb:hover {
             background: #333;
         }
     </style>
@@ -424,6 +522,7 @@
 <body>
 
     <div id="control-bar">
+        <button class="nav-btn secondary" onclick="toggleFullscreen()">Fullscreen</button>
         <button class="nav-btn secondary" onclick="switchView('tv')">TV Display</button>
         <button class="nav-btn secondary" onclick="switchView('tablet')">Tablet Mode</button>
         <button class="nav-btn" id="login-toggle-btn" onclick="handleAdminAuthBtn()">Login</button>
@@ -457,7 +556,7 @@
         <h1>Roster Dashboard</h1>
         
         <div class="admin-actions">
-            <input type="text" id="new-guest-name" class="admin-input" placeholder="Enter new guest full name and hit Enter...">
+            <input type="text" id="new-guest-name" class="admin-input" placeholder="Enter new guest full name...">
             <button class="nav-btn" onclick="addNewGuest()">Add Guest</button>
         </div>
 
@@ -467,7 +566,7 @@
     <div id="login-modal" class="app-modal">
         <div class="modal-box">
             <div class="modal-title">Enter Admin Passcode</div>
-            <input type="password" id="admin-passcode-input" class="admin-input" style="text-align: center;" placeholder="••••">
+            <input type="password" id="admin-passcode-input" class="admin-input" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px;" placeholder="••••">
             <div id="login-error-msg" class="modal-error">Incorrect Pin Code.</div>
             <div class="modal-buttons">
                 <button class="nav-btn secondary" onclick="closeModal('login-modal')">Cancel</button>
@@ -479,7 +578,7 @@
     <div id="delete-modal" class="app-modal">
         <div class="modal-box">
             <div class="modal-title">Remove Guest?</div>
-            <p style="color: var(--text-muted); margin-bottom: 10px;" id="delete-modal-text">Are you sure you want to remove this person?</p>
+            <p style="color: var(--text-muted); margin-bottom: 8px; font-size: 1rem; line-height: 1.5;" id="delete-modal-text">Are you sure you want to remove this person?</p>
             <div class="modal-buttons">
                 <button class="nav-btn secondary" onclick="closeModal('delete-modal')">Cancel</button>
                 <button class="nav-btn" style="background: #ff4444; color: white;" id="confirm-delete-btn">Remove</button>
@@ -513,6 +612,17 @@
         let isAdminLoggedIn = false;
         let deleteTargetKey = null;
 
+        // --- FULLSCREEN INTERACTION ENGINE ---
+        window.toggleFullscreen = function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        };
+
         // --- AUTH EXPOSURE LOGIC ---
         window.handleAdminAuthBtn = function() {
             if (isAdminLoggedIn) {
@@ -523,7 +633,11 @@
             }
             document.getElementById('admin-passcode-input').value = '';
             document.getElementById('login-error-msg').style.display = 'none';
-            document.getElementById('login-modal').classList.add('active');
+            
+            const modal = document.getElementById('login-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            
             document.getElementById('admin-passcode-input').focus();
         };
 
@@ -532,10 +646,14 @@
             if (codeInput.value === "1014") {
                 isAdminLoggedIn = true;
                 document.getElementById('login-toggle-btn').innerText = "Logout Admin";
-                document.getElementById('login-modal').classList.remove('active');
+                window.closeModal('login-modal');
                 switchView('admin');
             } else {
-                document.getElementById('login-error-msg').style.display = 'block';
+                const errMsg = document.getElementById('login-error-msg');
+                errMsg.style.display = 'block';
+                errMsg.style.animation = 'none';
+                setTimeout(() => errMsg.style.animation = '', 10);
+                
                 codeInput.value = '';
                 codeInput.focus();
             }
@@ -548,7 +666,11 @@
         });
 
         window.closeModal = function(id) {
-            document.getElementById(id).classList.remove('active');
+            const modal = document.getElementById(id);
+            modal.classList.remove('active');
+            setTimeout(() => {
+                if(!modal.classList.contains('active')) modal.style.display = 'none';
+            }, 300);
         };
 
         // --- LISTENERS TO SYNC INTERFACES FROM FIREBASE ---
@@ -573,12 +695,13 @@
             const tvContainer = document.getElementById('tv-roster');
             tvContainer.innerHTML = '';
             
-            Object.keys(guests).forEach(key => {
+            Object.keys(guests).forEach((key, index) => {
                 const guest = guests[key];
                 const isChecked = guest.status === 'here';
                 
                 const li = document.createElement('li');
                 li.className = `roster-item ${isChecked ? 'checked-in' : ''}`;
+                li.style.animationDelay = `${index * 0.03}s`;
                 li.innerHTML = `
                     <span>${guest.name}</span>
                     <div class="status-dot"></div>
@@ -591,12 +714,13 @@
             const tabletContainer = document.getElementById('tablet-roster');
             tabletContainer.innerHTML = '';
             
-            Object.keys(guests).forEach(key => {
+            Object.keys(guests).forEach((key, index) => {
                 const guest = guests[key];
                 const isChecked = guest.status === 'here';
                 
                 const div = document.createElement('div');
                 div.className = `guest-row ${isChecked ? 'here' : ''}`;
+                div.style.animationDelay = `${index * 0.04}s`;
                 div.innerHTML = `
                     <div class="guest-name">${guest.name}</div>
                     <div class="guest-status">${isChecked ? '✓ Signed In' : 'Sign In —>'}</div>
@@ -615,12 +739,13 @@
             const adminContainer = document.getElementById('admin-roster-list');
             adminContainer.innerHTML = '';
 
-            Object.keys(guests).forEach(key => {
+            Object.keys(guests).forEach((key, index) => {
                 const guest = guests[key];
                 const li = document.createElement('li');
                 li.className = 'admin-item';
+                li.style.animationDelay = `${index * 0.03}s`;
                 li.innerHTML = `
-                    <span>${guest.name} (${guest.status.toUpperCase()})</span>
+                    <span>${guest.name} <span style="font-size:0.75rem; color:#666; margin-left:8px;">[${guest.status.toUpperCase()}]</span></span>
                     <button class="delete-btn" onclick="openDeleteModal('${key}', '${guest.name.replace(/'/g, "\\'")}')">Remove</button>
                 `;
                 adminContainer.appendChild(li);
@@ -657,13 +782,16 @@
         window.openDeleteModal = function(key, name) {
             deleteTargetKey = key;
             document.getElementById('delete-modal-text').innerText = `Are you sure you want to remove "${name}" from the roster?`;
-            document.getElementById('delete-modal').classList.add('active');
+            
+            const modal = document.getElementById('delete-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
         };
 
         document.getElementById('confirm-delete-btn').addEventListener('click', function() {
             if (deleteTargetKey) {
                 remove(ref(db, `attendance/guests/${deleteTargetKey}`)).then(() => {
-                    document.getElementById('delete-modal').classList.remove('active');
+                    window.closeModal('delete-modal');
                     deleteTargetKey = null;
                 });
             }
