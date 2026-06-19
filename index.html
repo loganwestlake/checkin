@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brian's Graduation Check-In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #121212;
+            --border-color: #262626;
+            --text-main: #ffffff;
+            --text-muted: #a3a3a3;
+            --accent: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* View Toggler & Admin Access Layout */
+        #control-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button.nav-btn {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 0px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+            transition: opacity 0.2s;
+        }
+
+        button.nav-btn:hover {
+            opacity: 0.9;
+        }
+
+        button.nav-btn.secondary {
+            background: transparent;
+            color: #ffffff;
+            border: 1px solid var(--border-color);
+        }
+
+        button.nav-btn.secondary:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        /* Views Layout */
+        .view {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        /* ==================== TV VIEW STYLE ==================== */
+        #tv-view {
+            flex-direction: row;
+        }
+
+        #tv-left {
+            width: 70%;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        #tv-left h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        #tv-left p.sub {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        #tv-right {
+            width: 30%;
+            background-color: #050505;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        #tv-right h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .roster-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .roster-item {
+            font-size: 1.25rem;
+            padding: 12px 0;
+            border-bottom: 1px solid #1a1a1a;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .roster-item.checked-in {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .roster-item .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #222;
+        }
+
+        .roster-item.checked-in .status-dot {
+            background-color: #fff;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        /* Overlay Alert on TV */
+        #tv-alert-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        #tv-alert-overlay.show {
+            opacity: 1;
+        }
+
+        .checkmark-icon {
+            font-size: 7rem;
+            margin-bottom: 20px;
+            animation: scaleUp 0.4s ease;
+        }
+
+        #tv-alert-message {
+            font-size: 3rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ==================== TABLET VIEW STYLE (LIST VIEW) ==================== */
+        #tablet-view {
+            flex-direction: column;
+            padding: 40px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        #tablet-view h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #tablet-view p.instruction {
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tablet-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-bottom: 60px;
+            height: calc(100vh - 200px);
+        }
+
+        .guest-row {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guest-row:hover {
+            border-color: #555;
+            background: #161616;
+        }
+
+        .guest-row.here {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            pointer-events: none;
+        }
+
+        .guest-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .guest-status {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            opacity: 0.6;
+        }
+
+        .guest-row.here .guest-status {
+            opacity: 0.9;
+        }
+
+        /* ==================== ADMIN VIEW STYLE ==================== */
+        #admin-view {
+            flex-direction: column;
+            padding: 40px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        #admin-view h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .admin-input {
+            flex-grow: 1;
+            background: #121212;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 0px;
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: #fff;
+        }
+
+        .admin-list {
+            list-style: none;
+            overflow-y: auto;
+            height: calc(100vh - 300px);
+        }
+
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-item span {
+            font-size: 1.1rem;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: #ff4444;
+            border: 1px solid #ff4444;
+            padding: 6px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .delete-btn:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        /* ==================== APPS DIALOG MODALS ==================== */
+        .app-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .app-modal.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #0d0d0d;
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .modal-error {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @keyframes scaleUp {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="control-bar">
+        <button class="nav-btn secondary" onclick="switchView('tv')">TV Display</button>
+        <button class="nav-btn secondary" onclick="switchView('tablet')">Tablet Mode</button>
+        <button class="nav-btn" id="login-toggle-btn" onclick="handleAdminAuthBtn()">Login</button>
+    </div>
+
+    <div id="tv-view" class="view active">
+        <div id="tv-left">
+            <div id="tv-alert-overlay">
+                <div class="checkmark-icon">✓</div>
+                <div id="tv-alert-message">Welcome Guest!</div>
+            </div>
+            
+            <h1>Brian's<br>Graduation</h1>
+            <p class="sub">Please sign in on the tablet</p>
+        </div>
+        
+        <div id="tv-right">
+            <h2>Attending</h2>
+            <ul class="roster-list" id="tv-roster"></ul>
+        </div>
+    </div>
+
+    <div id="tablet-view" class="view">
+        <h1>Welcome</h1>
+        <p class="instruction">Select your name to check-in</p>
+        
+        <div class="tablet-list-container" id="tablet-roster"></div>
+    </div>
+
+    <div id="admin-view" class="view">
+        <h1>Roster Dashboard</h1>
+        
+        <div class="admin-actions">
+            <input type="text" id="new-guest-name" class="admin-input" placeholder="Enter new guest full name and hit Enter...">
+            <button class="nav-btn" onclick="addNewGuest()">Add Guest</button>
+        </div>
+
+        <ul class="admin-list" id="admin-roster-list"></ul>
+    </div>
+
+    <div id="login-modal" class="app-modal">
+        <div class="modal-box">
+            <div class="modal-title">Enter Admin Passcode</div>
+            <input type="password" id="admin-passcode-input" class="admin-input" style="text-align: center;" placeholder="••••">
+            <div id="login-error-msg" class="modal-error">Incorrect Pin Code.</div>
+            <div class="modal-buttons">
+                <button class="nav-btn secondary" onclick="closeModal('login-modal')">Cancel</button>
+                <button class="nav-btn" onclick="submitAdminLogin()">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="app-modal">
+        <div class="modal-box">
+            <div class="modal-title">Remove Guest?</div>
+            <p style="color: var(--text-muted); margin-bottom: 10px;" id="delete-modal-text">Are you sure you want to remove this person?</p>
+            <div class="modal-buttons">
+                <button class="nav-btn secondary" onclick="closeModal('delete-modal')">Cancel</button>
+                <button class="nav-btn" style="background: #ff4444; color: white;" id="confirm-delete-btn">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Configuration targeting your Realtime Database instance endpoint
+        const firebaseConfig = {
+            apiKey: "AIzaSyChksK08IR2YLyqIQE_TRp7wdy2A4F52ww",
+            authDomain: "brians-grad-che.firebaseapp.com",
+            projectId: "brians-grad-che",
+            databaseURL: "https://brians-grad-che-default-rtdb.firebaseio.com/",
+            storageBucket: "brians-grad-che.firebasestorage.app",
+            messagingSenderId: "776434328940",
+            appId: "1:776434328940:web:684bef97cc4e6c84db3f49"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Core references
+        const guestsRef = ref(db, 'attendance/guests');
+        const alertRef = ref(db, 'attendance/currentAlert');
+
+        let currentRosterData = {};
+        let isAdminLoggedIn = false;
+        let deleteTargetKey = null;
+
+        // --- AUTH EXPOSURE LOGIC ---
+        window.handleAdminAuthBtn = function() {
+            if (isAdminLoggedIn) {
+                isAdminLoggedIn = false;
+                document.getElementById('login-toggle-btn').innerText = "Login";
+                switchView('tablet');
+                return;
+            }
+            document.getElementById('admin-passcode-input').value = '';
+            document.getElementById('login-error-msg').style.display = 'none';
+            document.getElementById('login-modal').classList.add('active');
+            document.getElementById('admin-passcode-input').focus();
+        };
+
+        window.submitAdminLogin = function() {
+            const codeInput = document.getElementById('admin-passcode-input');
+            if (codeInput.value === "1014") {
+                isAdminLoggedIn = true;
+                document.getElementById('login-toggle-btn').innerText = "Logout Admin";
+                document.getElementById('login-modal').classList.remove('active');
+                switchView('admin');
+            } else {
+                document.getElementById('login-error-msg').style.display = 'block';
+                codeInput.value = '';
+                codeInput.focus();
+            }
+        };
+
+        document.getElementById('admin-passcode-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                window.submitAdminLogin();
+            }
+        });
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.remove('active');
+        };
+
+        // --- LISTENERS TO SYNC INTERFACES FROM FIREBASE ---
+        onValue(guestsRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            currentRosterData = data;
+            
+            renderTVRoster(data);
+            renderTabletRoster(data);
+            renderAdminRoster(data);
+        });
+
+        onValue(alertRef, (snapshot) => {
+            const alertData = snapshot.val();
+            if (alertData && alertData.active) {
+                triggerTvAlert(alertData.name);
+            }
+        });
+
+        // --- INTERFACE ENGINE RENDERS ---
+        function renderTVRoster(guests) {
+            const tvContainer = document.getElementById('tv-roster');
+            tvContainer.innerHTML = '';
+            
+            Object.keys(guests).forEach(key => {
+                const guest = guests[key];
+                const isChecked = guest.status === 'here';
+                
+                const li = document.createElement('li');
+                li.className = `roster-item ${isChecked ? 'checked-in' : ''}`;
+                li.innerHTML = `
+                    <span>${guest.name}</span>
+                    <div class="status-dot"></div>
+                `;
+                tvContainer.appendChild(li);
+            });
+        }
+
+        function renderTabletRoster(guests) {
+            const tabletContainer = document.getElementById('tablet-roster');
+            tabletContainer.innerHTML = '';
+            
+            Object.keys(guests).forEach(key => {
+                const guest = guests[key];
+                const isChecked = guest.status === 'here';
+                
+                const div = document.createElement('div');
+                div.className = `guest-row ${isChecked ? 'here' : ''}`;
+                div.innerHTML = `
+                    <div class="guest-name">${guest.name}</div>
+                    <div class="guest-status">${isChecked ? '✓ Signed In' : 'Sign In —>'}</div>
+                `;
+                
+                if (!isChecked) {
+                    div.addEventListener('click', () => {
+                        checkInGuest(key, guest.name);
+                    });
+                }
+                tabletContainer.appendChild(div);
+            });
+        }
+
+        function renderAdminRoster(guests) {
+            const adminContainer = document.getElementById('admin-roster-list');
+            adminContainer.innerHTML = '';
+
+            Object.keys(guests).forEach(key => {
+                const guest = guests[key];
+                const li = document.createElement('li');
+                li.className = 'admin-item';
+                li.innerHTML = `
+                    <span>${guest.name} (${guest.status.toUpperCase()})</span>
+                    <button class="delete-btn" onclick="openDeleteModal('${key}', '${guest.name.replace(/'/g, "\\'")}')">Remove</button>
+                `;
+                adminContainer.appendChild(li);
+            });
+        }
+
+        // --- DATA WRITE OPERATIONS ---
+        window.checkInGuest = function(key, name) {
+            update(ref(db, `attendance/guests/${key}`), { status: 'here' });
+            set(alertRef, { active: true, name: name, timestamp: Date.now() });
+        };
+
+        window.addNewGuest = function() {
+            const input = document.getElementById('new-guest-name');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const newGuestRef = push(guestsRef);
+            set(newGuestRef, {
+                name: name,
+                status: "absent"
+            }).then(() => {
+                input.value = '';
+                input.focus();
+            });
+        };
+
+        document.getElementById('new-guest-name').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                window.addNewGuest();
+            }
+        });
+
+        window.openDeleteModal = function(key, name) {
+            deleteTargetKey = key;
+            document.getElementById('delete-modal-text').innerText = `Are you sure you want to remove "${name}" from the roster?`;
+            document.getElementById('delete-modal').classList.add('active');
+        };
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+            if (deleteTargetKey) {
+                remove(ref(db, `attendance/guests/${deleteTargetKey}`)).then(() => {
+                    document.getElementById('delete-modal').classList.remove('active');
+                    deleteTargetKey = null;
+                });
+            }
+        });
+
+        function triggerTvAlert(name) {
+            const overlay = document.getElementById('tv-alert-overlay');
+            const msg = document.getElementById('tv-alert-message');
+            
+            msg.innerText = `${name} is here!`;
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                set(alertRef, { active: false, name: "", timestamp: 0 });
+            }, 3500);
+        }
+
+        window.switchView = function(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active');
+        };
+    </script>
+</body>
+</html>
