@@ -163,11 +163,12 @@
             list-style: none;
             overflow-y: auto;
             flex-grow: 1;
+            padding-right: 16px; /* Prevents dot cut-off against the scroll track */
         }
 
         .roster-item {
             font-size: 1.25rem;
-            padding: 16px 0;
+            padding: 16px 8px; /* Safe padding alignment */
             border-bottom: 1px solid #121212;
             color: var(--text-muted);
             display: flex;
@@ -186,12 +187,13 @@
             height: 6px;
             border-radius: 50%;
             background-color: #1a1a1a;
+            margin-right: 8px; /* Keeps glow effects safely inside container boundary */
             transition: all 0.4s var(--ease-custom);
         }
 
         .roster-item.checked-in .status-dot {
             background-color: #fff;
-            box-shadow: 0 0 12px 2px #fff;
+            box-shadow: 0 0 12px 3px #fff;
         }
 
         /* Overlay Alert on TV */
@@ -334,7 +336,7 @@
         #admin-view {
             flex-direction: column;
             padding: 60px 40px;
-            max-width: 680px;
+            max-width: 780px;
             margin: 0 auto;
         }
 
@@ -375,20 +377,64 @@
             list-style: none;
             overflow-y: auto;
             height: calc(100vh - 320px);
+            padding-right: 10px;
         }
 
         .admin-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
             animation: rowEntrance 0.4s var(--ease-custom) both;
         }
 
-        .admin-item span {
+        .admin-item:hover {
+            border-color: var(--border-hover);
+        }
+
+        .admin-inline-name-input {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #fff;
             font-size: 1.1rem;
             font-weight: 500;
+            padding: 6px 10px;
+            width: 50%;
+            transition: all 0.2s;
+        }
+
+        .admin-inline-name-input:focus {
+            background: #000;
+            border-color: #444;
+            outline: none;
+        }
+
+        .admin-row-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-toggle-btn {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px 14px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-toggle-btn.here {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
         }
 
         .delete-btn {
@@ -440,6 +486,7 @@
             width: 100%;
             max-width: 420px;
             text-align: center;
+            border-radius: 0px; /* Sharp Minimalist Edges */
             transform: scale(0.9);
             opacity: 0;
             transition: all 0.3s var(--ease-custom);
@@ -741,21 +788,45 @@
 
             Object.keys(guests).forEach((key, index) => {
                 const guest = guests[key];
+                const isHere = guest.status === 'here';
+                
                 const li = document.createElement('li');
                 li.className = 'admin-item';
                 li.style.animationDelay = `${index * 0.03}s`;
+                
                 li.innerHTML = `
-                    <span>${guest.name} <span style="font-size:0.75rem; color:#666; margin-left:8px;">[${guest.status.toUpperCase()}]</span></span>
-                    <button class="delete-btn" onclick="openDeleteModal('${key}', '${guest.name.replace(/'/g, "\\'")}')">Remove</button>
+                    <input type="text" class="admin-inline-name-input" value="${guest.name}" onchange="updateGuestName('${key}', this.value)">
+                    <div class="admin-row-controls">
+                        <button class="status-toggle-btn ${isHere ? 'here' : ''}" onclick="toggleGuestStatus('${key}', '${guest.status}', '${guest.name.replace(/'/g, "\\'")}')">
+                            ${isHere ? 'Present' : 'Absent'}
+                        </button>
+                        <button class="delete-btn" onclick="openDeleteModal('${key}', '${guest.name.replace(/'/g, "\\'")}')">Remove</button>
+                    </div>
                 `;
                 adminContainer.appendChild(li);
             });
         }
 
-        // --- DATA WRITE OPERATIONS ---
+        // --- DATA OPERATIONS (EDIT / WRITE / TOGGLE) ---
         window.checkInGuest = function(key, name) {
             update(ref(db, `attendance/guests/${key}`), { status: 'here' });
             set(alertRef, { active: true, name: name, timestamp: Date.now() });
+        };
+
+        window.updateGuestName = function(key, newName) {
+            const trimmed = newName.trim();
+            if (!trimmed) return;
+            update(ref(db, `attendance/guests/${key}`), { name: trimmed });
+        };
+
+        window.toggleGuestStatus = function(key, currentStatus, name) {
+            const nextStatus = currentStatus === 'here' ? 'absent' : 'here';
+            update(ref(db, `attendance/guests/${key}`), { status: nextStatus });
+            
+            // If turning into Present, fire the TV overlay alert banner too
+            if (nextStatus === 'here') {
+                set(alertRef, { active: true, name: name, timestamp: Date.now() });
+            }
         };
 
         window.addNewGuest = function() {
